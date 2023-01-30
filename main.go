@@ -32,7 +32,7 @@ func main() {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Printf("Starting server on port %sn", port)
+	fmt.Printf("Starting server on port %s\n", port)
 	log.Fatal(server.ListenAndServe())
 }
 
@@ -41,15 +41,17 @@ func findFastest(urls []string) response {
 	latencyChan := make(chan time.Duration)
 
 	for _, url := range urls {
-		mirrorUrl := url
+		mirrorURL := url
 		go func() {
+			log.Println("Started probing: ", mirrorURL)
 			start := time.Now()
-			_, err := http.Get(mirrorUrl + "/README")
+			_, err := http.Get(mirrorURL + "/README")
 			latency := time.Now().Sub(start) / time.Millisecond
-			if err != nil {
-				urlChan <- mirrorUrl
+			if err == nil {
+				urlChan <- mirrorURL
 				latencyChan <- latency
 			}
+			log.Printf("Got the best mirror: %s with latency: %s", mirrorURL, latency)
 		}()
 	}
 
